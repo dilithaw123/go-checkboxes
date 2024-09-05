@@ -1,0 +1,26 @@
+services:
+  bitsetserver:
+    build:
+      dockerfile: ./dockerfile.bitserver
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - BOXES=1000000
+    networks:
+      - base
+  backend-1:
+    build:
+      dockerfile: ./dockerfile.web
+    ports:
+      - "5051:5051"
+    environment:
+      - PORT=5051
+      - BOXES=1000000
+      - DOMAIN=DOMAIN_GOES_HERE
+    depends_on:
+      - bitsetserver
+    networks:
+      - base
+networks:
+  base:

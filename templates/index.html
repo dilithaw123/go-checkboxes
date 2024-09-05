@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Checkboxes</title>
+  <script>
+    var isSecure = window.location.protocol === "https:";
+    var wsProtocol = isSecure ? "wss" : "ws";
+    const ws = new WebSocket(`${wsProtocol}://{{.Domain}}/subscribe`);
+
+    const num = "{{.Num}}";
+    var bytes;
+
+    function initialise() {
+      for (var i = 0; i < num; i++) {
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.setAttribute("onchange", `send(${i})`);
+        document.body.appendChild(checkbox);
+      }
+    }
+
+    ws.addEventListener("message", function (event) {
+      console.log("New state", event.data);
+      checkBoxes(event.data);
+    });
+
+    function checkBoxes(data) {
+      var checkboxes = document.getElementsByTagName("input");
+      arrBuff = data.arrayBuffer().then(function (buffer) {
+        bytes = new Uint8Array(buffer);
+        for (var i = 0; i < bytes.length; i++) {
+          var byte = bytes[i];
+          for (var j = 0; j < 8; j++) {
+            var value = byte & (1 << j);
+            if (checkboxes[i * 8 + j]) {
+              checkboxes[i * 8 + j].checked = value;
+            }
+          }
+        }
+      });
+    }
+
+    function send(i) {
+      let element = document.getElementsByTagName("input")[i];
+      let sendData = `${element.checked ? 1 : 0}${i}`;
+      console.log("Sending", sendData);
+      ws.send(sendData);
+    }
+
+    window.onload = initialise;
+  </script>
+</head>
+
+<body></body>
+
+</html>

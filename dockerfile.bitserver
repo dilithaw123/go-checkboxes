@@ -1,0 +1,6 @@
+FROM golang:1.22.5 
+WORKDIR /go/src/app
+COPY . .
+RUN go get -d ./...
+
+CMD ["go", "run", "./cmd/bitserver/main.go"]
